@@ -50,12 +50,12 @@ router.put("/:id", (req, res) => {
   try {
     const movies = getMovies()
 
-    const newMovies = students.filter(student => student.ID !== req.params.id)
+    const newMovies = movies.filter(movie => movie.ID !== req.params.id)
 
     const modifiedMovie = { ...req.body, ID: req.params.id, modifiedAt: new Date() }
 
     newMovies.push(modifiedMovie)
-    fs.writeFileSync(join(__dirname, "movies.json"), JSON.stringify(newMovies))
+    fs.writeFileSync(join(__dirname, "media.json"), JSON.stringify(newMovies))
 
     res.send(modifiedStudent)
   } catch (error) {
@@ -65,10 +65,10 @@ router.put("/:id", (req, res) => {
 
 router.delete("/:id", (req, res) => {
   try {
-    const students = getMovies()
+    const movies = getMovies()
 
-    const newStudents = students.filter(student => student.ID !== req.params.id)
-    fs.writeFileSync(join(__dirname, "movies.json"), JSON.stringify(newStudents))
+    const newMovies = movies.filter(movie => movie.ID !== req.params.id)
+    fs.writeFileSync(join(__dirname, "media.json"), JSON.stringify(newMovies))
     res.status(204).send()
   } catch (error) {
     console.log(error)

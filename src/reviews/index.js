@@ -3,21 +3,21 @@ import express from "express"
 import uniqid from "uniqid"
 import { check, validationResult } from "express-validator"
 
-import { getStudents, writeStudents } from "../lib/fs-tools.js"
+import { getReviews, writeReviews } from "../lib/fs-tools.js"
 
 const router = express.Router()
 
 router.get("/", async (req, res, next) => {
   // http://localhost:3002/students --> full list of students http://localhost:3002/students?name=Bruce&ID=123412312 --> filtered list of students
   try {
-    const students = await getStudents()
+    const reviews = await getReviews()
 
     if (req.query && req.query.name) {
-      const filteredStudents = students.filter(student => student.hasOwnProperty("name") && student.name === req.query.name)
+      const filteredReviews = reviews.filter(review => review.hasOwnProperty("name") && review.name === req.query.name)
 
-      res.send(filteredStudents)
+      res.send(filteredReviews)
     } else {
-      res.send(students)
+      res.send(reviews)
     }
   } catch (error) {
     console.log(error)
@@ -25,14 +25,14 @@ router.get("/", async (req, res, next) => {
   }
 })
 
-router.get("/:batman", async (req, res, next) => {
+router.get("/:name", async (req, res, next) => {
   //http://localhost:3002/students/123412312
   try {
-    const students = await getStudents()
+    const reviews = await getReviews()
 
-    const student = students.find(student => student.ID === req.params.batman)
-    if (student) {
-      res.send(student)
+    const review = reviews.find(review => review.ID === req.params.name)
+    if (review) {
+      res.send(review)
     } else {
       const err = new Error("User not found")
       err.httpStatusCode = 404
@@ -46,24 +46,23 @@ router.get("/:batman", async (req, res, next) => {
 
 router.post(
   "/",
-  [check("name").exists().withMessage("Name is mandatory field!"), check("age").isInt().withMessage("Age must be an integer!")],
+  [check("name").exists().withMessage("Name is mandatory field!"), check("comment").exists().withMessage("Add a comment!")],
   async (req, res, next) => {
     try {
       const errors = validationResult(req)
 
       if (!errors.isEmpty()) {
-        // if we had errors
         const err = new Error()
         err.errorList = errors
         err.httpStatusCode = 400
         next(err)
       } else {
-        const students = await getStudents()
-        const newStudent = { ...req.body, ID: uniqid(), createdAt: new Date() }
+        const reviews = await getReviews()
+        const newReview = { ...req.body, ID: uniqid(), createdAt: new Date() }
 
-        students.push(newStudent)
+        reviews.push(newReview)
 
-        await writeStudents(students)
+        await writeReviews(reviews)
 
         res.status(201).send({ id: newStudent.ID })
       }
@@ -74,29 +73,29 @@ router.post(
   }
 )
 
-router.put("/:id", async (req, res, next) => {
+router.put("/:name", async (req, res, next) => {
   try {
-    const students = await getStudents()
+    const reviews = await getReviews()
 
-    const newStudents = students.filter(student => student.ID !== req.params.id)
+    const newReviews = reviews.filter(review => review.ID !== req.params.id)
 
-    const modifiedStudent = { ...req.body, ID: req.params.id, modifiedAt: new Date() }
+    const modifiedReview = { ...req.body, ID: req.params.id, modifiedAt: new Date() }
 
-    newStudents.push(modifiedStudent)
-    await writeStudents(newStudents)
+    newReviews.push(modifiedReview)
+    await writeReviews(newReviews)
 
-    res.send(modifiedStudent)
+    res.send(modifiedReview)
   } catch (error) {
     console.log(error)
   }
 })
 
-router.delete("/:id", async (req, res, next) => {
+router.delete("/:name", async (req, res, next) => {
   try {
-    const students = await getStudents()
+    const reviews = await getReviews()
 
-    const newStudents = students.filter(student => student.ID !== req.params.id)
-    await writeStudents(newStudents)
+    const newReviews = reviews.filter(review => review.ID !== req.params.id)
+    await writeReviews(newReviews)
     res.status(204).send()
   } catch (error) {
     console.log(error)
