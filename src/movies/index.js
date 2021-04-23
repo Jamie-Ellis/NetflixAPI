@@ -57,7 +57,7 @@ router.put("/:id", (req, res) => {
     newMovies.push(modifiedMovie)
     fs.writeFileSync(join(__dirname, "media.json"), JSON.stringify(newMovies))
 
-    res.send(modifiedStudent)
+    res.send(modifiedMovie)
   } catch (error) {
     console.log(error)
   }
